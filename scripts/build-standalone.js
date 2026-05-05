@@ -1,18 +1,23 @@
-import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { execFileSync } from "node:child_process";
 
 const root = resolve(import.meta.dirname, "..");
 const dist = join(root, "dist");
 const build = join(root, ".build");
+const binaryName = process.platform === "win32" ? "deepseek2response.exe" : "deepseek2response";
 const bundlePath = join(build, "deepseek2response.bundle.js");
 const seaConfigPath = join(build, "sea-config.json");
-const exePath = join(dist, "deepseek2response.exe");
+const exePath = join(dist, binaryName);
 
 rmSync(build, { recursive: true, force: true });
 mkdirSync(build, { recursive: true });
 mkdirSync(dist, { recursive: true });
+rmSync(join(dist, "deepseek2response.exe"), { force: true });
+rmSync(join(dist, "deepseek2response"), { force: true });
 rmSync(join(dist, "Start DeepSeek2Response Exe.cmd"), { force: true });
+rmSync(join(dist, "Start DeepSeek2Response.cmd"), { force: true });
+rmSync(join(dist, "start-deepseek2response.sh"), { force: true });
 
 const modules = new Map();
 collectModule("src/server.js");
@@ -38,10 +43,15 @@ main.startStandalone();
 writeFileSync(bundlePath, bundle);
 writeFileSync(seaConfigPath, JSON.stringify({ main: bundlePath, output: exePath }, null, 2));
 execFileSync(process.execPath, [`--build-sea=${seaConfigPath}`], { stdio: "inherit" });
+if (process.platform !== "win32") {
+  chmodSync(exePath, 0o755);
+}
 copyFileSync(join(root, ".env.example"), join(dist, ".env.example"));
 copyFileSync(join(root, "codex-config.example.toml"), join(dist, "codex-config.example.toml"));
 copyFileSync(join(root, "README.md"), join(dist, "README.md"));
-writeFileSync(join(dist, "Start DeepSeek2Response.cmd"), `@echo off
+
+if (process.platform === "win32") {
+  writeFileSync(join(dist, "Start DeepSeek2Response.cmd"), `@echo off
 setlocal
 cd /d "%~dp0"
 
@@ -54,6 +64,20 @@ if not exist ".env" (
 deepseek2response.exe
 pause
 `);
+} else {
+  writeFileSync(join(dist, "start-deepseek2response.sh"), `#!/usr/bin/env sh
+set -eu
+cd "$(dirname "$0")"
+
+if [ ! -f ".env" ]; then
+  echo "Missing .env. Copy .env.example to .env and set DEEPSEEK_API_KEY."
+  exit 1
+fi
+
+./deepseek2response
+`);
+  chmodSync(join(dist, "start-deepseek2response.sh"), 0o755);
+}
 
 function collectModule(relativePath) {
   const normalized = normalizePath(relativePath);

@@ -179,7 +179,7 @@ export function resolveEnvPath(execPath = process.execPath, env = process.env) {
     return env.DEEPSEEK2RESPONSE_ENV_FILE;
   }
 
-  if (execPath.toLowerCase().endsWith("deepseek2response.exe")) {
+  if (isStandaloneBinaryPath(execPath)) {
     const exeEnvPath = join(dirname(execPath), ".env");
     if (existsSync(exeEnvPath)) {
       return exeEnvPath;
@@ -189,6 +189,11 @@ export function resolveEnvPath(execPath = process.execPath, env = process.env) {
   }
 
   return ".env";
+}
+
+function isStandaloneBinaryPath(execPath) {
+  const normalized = execPath.toLowerCase().replaceAll("\\", "/");
+  return normalized.endsWith("/deepseek2response.exe") || normalized.endsWith("/deepseek2response");
 }
 
 const isDirectRun = typeof __DEEPSEEK2RESPONSE_BUNDLE__ === "undefined" && import.meta.url === pathToFileURL(process.argv[1]).href;

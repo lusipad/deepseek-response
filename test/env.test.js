@@ -43,6 +43,21 @@ test("resolves exe-adjacent .env before parent .env", () => {
   }
 });
 
+test("resolves Unix binary-adjacent .env before parent .env", () => {
+  const dir = mkdtempSync(join(tmpdir(), "deepseek2response-env-unix-path-"));
+
+  try {
+    const dist = join(dir, "dist");
+    mkdirSync(dist);
+    writeFileSync(join(dir, ".env"), "PARENT=1\n");
+    writeFileSync(join(dist, ".env"), "DIST=1\n");
+
+    assert.equal(resolveEnvPath(join(dist, "deepseek2response"), {}), join(dist, ".env"));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("falls back to parent .env for repo-local dist exe", () => {
   const dir = mkdtempSync(join(tmpdir(), "deepseek2response-env-parent-"));
 

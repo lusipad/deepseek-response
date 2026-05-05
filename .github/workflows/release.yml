@@ -15,13 +15,35 @@ permissions:
   contents: write
 
 jobs:
-  release-windows-exe:
-    name: Release Windows executable
-    runs-on: windows-latest
+  build-release-asset:
+    name: Build ${{ matrix.name }} release asset
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64
+            os: windows-latest
+            artifact: deepseek-response-windows-x64
+            package: deepseek-response-windows-x64.zip
+          - name: Linux x64
+            os: ubuntu-latest
+            artifact: deepseek-response-linux-x64
+            package: deepseek-response-linux-x64.tar.gz
+          - name: macOS arm64
+            os: macos-latest
+            artifact: deepseek-response-macos-arm64
+            package: deepseek-response-macos-arm64.tar.gz
+          - name: macOS x64
+            os: macos-15-intel
+            artifact: deepseek-response-macos-x64
+            package: deepseek-response-macos-x64.tar.gz
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -31,43 +53,55 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Build standalone exe
+      - name: Build standalone executable
         run: npm run build:exe
 
-      - name: Smoke test standalone exe
+      - name: Smoke test standalone executable
         run: npm run smoke:exe
 
-      - name: Print smoke logs on failure
-        if: failure()
+      - name: Package Windows release asset
+        if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          foreach ($path in @("exe-smoke-mock.out.log", "exe-smoke-mock.err.log", "exe-smoke.out.log", "exe-smoke.err.log")) {
-            Write-Host "===== $path ====="
-            if (Test-Path $path) {
-              Get-Content -LiteralPath $path -ErrorAction SilentlyContinue
-            } else {
-              Write-Host "(missing)"
-            }
-          }
+          Compress-Archive -Path dist\* -DestinationPath ${{ matrix.package }} -Force
 
-      - name: Package release asset
-        shell: pwsh
+      - name: Package Unix release asset
+        if: runner.os != 'Windows'
         run: |
-          Compress-Archive -Path dist\* -DestinationPath deepseek-response-windows-x64.zip -Force
+          tar -czf "${{ matrix.package }}" -C dist .
+
+      - name: Upload release asset artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.package }}
+          if-no-files-found: error
+
+  publish-release:
+    name: Publish GitHub release
+    runs-on: ubuntu-latest
+    needs: build-release-asset
+
+    steps:
+      - name: Download release asset artifacts
+        uses: actions/download-artifact@v7
+        with:
+          path: release-assets
+          merge-multiple: true
 
       - name: Resolve release tag
         id: release_tag
-        shell: pwsh
         run: |
           $tag = "${{ github.event.inputs.tag }}"
           if (-not $tag) {
             $tag = "${{ github.ref_name }}"
           }
-          "tag=$tag" >> $env:GITHUB_OUTPUT
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+        shell: pwsh
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.release_tag.outputs.tag }}
-          files: deepseek-response-windows-x64.zip
+          files: release-assets/*
           generate_release_notes: true

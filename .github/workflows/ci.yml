@@ -12,7 +12,7 @@ on:
 jobs:
   test:
     name: Test
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -26,10 +26,30 @@ jobs:
       - name: Run tests
         run: npm test
 
-  build-windows-exe:
-    name: Build Windows executable
-    runs-on: windows-latest
+  build-binary:
+    name: Build ${{ matrix.name }} executable
+    runs-on: ${{ matrix.os }}
     needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64
+            os: windows-latest
+            artifact: deepseek-response-windows-x64
+            package: deepseek-response-windows-x64.zip
+          - name: Linux x64
+            os: ubuntu-latest
+            artifact: deepseek-response-linux-x64
+            package: deepseek-response-linux-x64.tar.gz
+          - name: macOS arm64
+            os: macos-latest
+            artifact: deepseek-response-macos-arm64
+            package: deepseek-response-macos-arm64.tar.gz
+          - name: macOS x64
+            os: macos-15-intel
+            artifact: deepseek-response-macos-x64
+            package: deepseek-response-macos-x64.tar.gz
 
     steps:
       - name: Checkout
@@ -40,38 +60,26 @@ jobs:
         with:
           node-version: 25
 
-      - name: Build standalone exe
+      - name: Build standalone executable
         run: npm run build:exe
 
-      - name: Smoke test standalone exe
-        id: smoke_exe
-        continue-on-error: true
+      - name: Smoke test standalone executable
         run: npm run smoke:exe
 
-      - name: Print smoke logs
-        if: always()
+      - name: Package Windows artifact
+        if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          foreach ($path in @("exe-smoke-mock.out.log", "exe-smoke-mock.err.log", "exe-smoke.out.log", "exe-smoke.err.log")) {
-            Write-Host "===== $path ====="
-            if (Test-Path $path) {
-              Get-Content -LiteralPath $path -ErrorAction SilentlyContinue
-            } else {
-              Write-Host "(missing)"
-            }
-          }
-          if ("${{ steps.smoke_exe.outcome }}" -ne "success") {
-            Write-Warning "Executable smoke failed on the hosted runner. The build artifact is still uploaded; inspect the logs above."
-          }
+          Compress-Archive -Path dist\* -DestinationPath ${{ matrix.package }} -Force
 
-      - name: Package artifact
-        shell: pwsh
+      - name: Package Unix artifact
+        if: runner.os != 'Windows'
         run: |
-          Compress-Archive -Path dist\* -DestinationPath deepseek-response-windows-x64.zip -Force
+          tar -czf "${{ matrix.package }}" -C dist .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
-          name: deepseek-response-windows-x64
-          path: deepseek-response-windows-x64.zip
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.package }}
           if-no-files-found: error
