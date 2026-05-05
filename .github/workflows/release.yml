@@ -37,6 +37,19 @@ jobs:
       - name: Smoke test standalone exe
         run: npm run smoke:exe
 
+      - name: Print smoke logs on failure
+        if: failure()
+        shell: pwsh
+        run: |
+          foreach ($path in @("exe-smoke-mock.out.log", "exe-smoke-mock.err.log", "exe-smoke.out.log", "exe-smoke.err.log")) {
+            Write-Host "===== $path ====="
+            if (Test-Path $path) {
+              Get-Content -LiteralPath $path -ErrorAction SilentlyContinue
+            } else {
+              Write-Host "(missing)"
+            }
+          }
+
       - name: Package release asset
         shell: pwsh
         run: |

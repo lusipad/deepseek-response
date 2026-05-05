@@ -5,6 +5,12 @@ const host = process.env.MOCK_DEEPSEEK_HOST || "127.0.0.1";
 let toolScenarioCalls = 0;
 
 const server = http.createServer(async (request, response) => {
+  if (request.method === "GET" && request.url === "/health") {
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(JSON.stringify({ ok: true }));
+    return;
+  }
+
   if (request.method === "POST" && request.url === "/chat/completions") {
     const body = await readJson(request);
     const scenario = process.env.MOCK_DEEPSEEK_SCENARIO || "text";

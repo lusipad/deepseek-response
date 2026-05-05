@@ -66,7 +66,7 @@ $env:MOCK_DEEPSEEK_SCENARIO = "text"
 $mock = Start-Process -FilePath node -ArgumentList "scripts/mock-deepseek.js" -WorkingDirectory $repo -WindowStyle Hidden -RedirectStandardOutput $mockOut -RedirectStandardError $mockErr -PassThru
 
 try {
-  Wait-ForHttp "http://127.0.0.1:$mockPort/health" -AllowNotFound
+  Wait-ForHttp "http://127.0.0.1:$mockPort/health"
 
   $envPath = Join-Path $repo "dist\.env"
   @"
