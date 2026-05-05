@@ -1,0 +1,9 @@
+[profiles.deepseek2response]
+model_provider = "deepseek2response"
+model = "deepseek-auto"
+
+[model_providers.deepseek2response]
+name = "deepseek2response"
+base_url = "http://127.0.0.1:18488/v1"
+env_key = "DEEPSEEK2RESPONSE_API_KEY"
+wire_api = "responses"

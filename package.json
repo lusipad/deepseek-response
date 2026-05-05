@@ -1,0 +1,35 @@
+{
+  "name": "deepseek-response",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local Responses API compatibility proxy for DeepSeek Chat Completions.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lusipad/deepseek-response.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lusipad/deepseek-response/issues"
+  },
+  "homepage": "https://github.com/lusipad/deepseek-response#readme",
+  "keywords": [
+    "codex",
+    "responses-api",
+    "deepseek",
+    "proxy",
+    "coding-agent"
+  ],
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test",
+    "smoke:local": "node scripts/local-smoke.js",
+    "smoke:exe": "powershell -ExecutionPolicy Bypass -File scripts/exe-smoke.ps1",
+    "smoke:codex": "powershell -ExecutionPolicy Bypass -File scripts/codex-smoke.ps1",
+    "mock:deepseek": "node scripts/mock-deepseek.js",
+    "build:exe": "node scripts/build-standalone.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

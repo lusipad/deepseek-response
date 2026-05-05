@@ -1,0 +1,25 @@
+name: Feature request
+description: Suggest a compatibility improvement
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What Codex or DeepSeek behavior should be supported?
+    validations:
+      required: true
+  - type: textarea
+    id: desired
+    attributes:
+      label: Desired behavior
+      description: What should the proxy do?
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Compatibility evidence
+      description: Link to Codex source, DeepSeek docs, or a redacted failing request if available.

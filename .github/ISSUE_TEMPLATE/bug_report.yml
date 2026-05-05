@@ -1,0 +1,40 @@
+name: Bug report
+description: Report a compatibility or runtime bug
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What failed?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Include the smallest request, Codex command, or log excerpt that reproduces the issue. Do not include API keys.
+      placeholder: |
+        1. Start proxy with ...
+        2. Run codex ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: input
+    id: codex_version
+    attributes:
+      label: Codex CLI version
+      placeholder: "codex-cli 0.128.0"
+  - type: input
+    id: model
+    attributes:
+      label: DeepSeek model
+      placeholder: "deepseek-auto / deepseek-v4-pro / deepseek-v4-flash"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Paste redacted logs only. Remove API keys and tokens.
+      render: text

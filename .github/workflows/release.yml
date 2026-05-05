@@ -1,0 +1,60 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to attach to the release
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release-windows-exe:
+    name: Release Windows executable
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 25
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build standalone exe
+        run: npm run build:exe
+
+      - name: Smoke test standalone exe
+        run: npm run smoke:exe
+
+      - name: Package release asset
+        shell: pwsh
+        run: |
+          Compress-Archive -Path dist\* -DestinationPath deepseek-response-windows-x64.zip -Force
+
+      - name: Resolve release tag
+        id: release_tag
+        shell: pwsh
+        run: |
+          $tag = "${{ github.event.inputs.tag }}"
+          if (-not $tag) {
+            $tag = "${{ github.ref_name }}"
+          }
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release_tag.outputs.tag }}
+          files: deepseek-response-windows-x64.zip
+          generate_release_notes: true
