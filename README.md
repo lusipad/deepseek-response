@@ -49,7 +49,6 @@
 | Windows x64 | `deepseek-response-windows-x64.zip` | `Start DeepSeek2Response.cmd` |
 | Linux x64 | `deepseek-response-linux-x64.tar.gz` | `./start-deepseek2response.sh` |
 | macOS arm64 | `deepseek-response-macos-arm64.tar.gz` | `./start-deepseek2response.sh` |
-| macOS x64 | `deepseek-response-macos-x64.tar.gz` | `./start-deepseek2response.sh` |
 
 首次运行前，把包里的 `.env.example` 复制成 `.env`，填入 `DEEPSEEK_API_KEY`。
 
