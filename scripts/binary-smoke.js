@@ -13,6 +13,8 @@ if (!existsSync(binaryPath)) {
   throw new Error(`dist/${binaryName} not found. Run npm run build:exe first.`);
 }
 
+console.log(`binary smoke using ${binaryPath} on ${process.platform}/${process.arch}`);
+
 const mockPort = await getFreePort();
 let proxyPort = await getFreePort();
 while (proxyPort === mockPort) {
@@ -48,11 +50,15 @@ const child = spawn(binaryPath, {
 
 let stdout = "";
 let stderr = "";
+let childExit = null;
 child.stdout.on("data", (chunk) => {
   stdout += chunk;
 });
 child.stderr.on("data", (chunk) => {
   stderr += chunk;
+});
+child.on("exit", (code, signal) => {
+  childExit = { code, signal };
 });
 
 try {
@@ -79,9 +85,12 @@ try {
   console.error(stdout);
   console.error("binary stderr:");
   console.error(stderr);
+  console.error(`binary exit: ${JSON.stringify(childExit)}`);
   throw error;
 } finally {
-  child.kill();
+  if (childExit === null) {
+    child.kill();
+  }
   mockServer.close();
   rmSync(envPath, { force: true });
 }

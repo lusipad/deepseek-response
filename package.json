@@ -32,6 +32,6 @@
     "build:exe": "node scripts/build-standalone.js"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   }
 }
