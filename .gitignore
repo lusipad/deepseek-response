@@ -2,6 +2,7 @@ node_modules/
 .env
 .build/
 dist/
+.playwright-mcp/
 .codex-request-sample.json
 *.log
 *.jsonl
