@@ -25,7 +25,10 @@ function Wait-ForHttp {
       return
     } catch {
       $lastError = $_
-      $statusCode = $_.Exception.Response.StatusCode.value__
+      $statusCode = $null
+      if ($_.Exception.Response -and $_.Exception.Response.StatusCode) {
+        $statusCode = $_.Exception.Response.StatusCode.value__
+      }
       if ($AllowNotFound -and $statusCode -eq 404) {
         return
       }
