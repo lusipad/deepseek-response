@@ -45,7 +45,11 @@ $mockErr = Join-Path $repo "exe-smoke-mock.err.log"
 $exeOut = Join-Path $repo "exe-smoke.out.log"
 $exeErr = Join-Path $repo "exe-smoke.err.log"
 $mockPort = Get-FreeTcpPort
-$proxyPort = Get-FreeTcpPort
+do {
+  $proxyPort = Get-FreeTcpPort
+} while ($proxyPort -eq $mockPort)
+
+Write-Host "exe smoke using mock port $mockPort and proxy port $proxyPort"
 
 foreach ($path in @($mockOut, $mockErr, $exeOut, $exeErr)) {
   if (Test-Path $path) {
