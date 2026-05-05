@@ -128,6 +128,23 @@ $env:DEEPSEEK2RESPONSE_URL="http://127.0.0.1:18488/v1"
 npm run smoke:local
 ```
 
+需要用真实 DeepSeek API 做手动验证时，先确认 `.env` 里已经配置真实 `DEEPSEEK_API_KEY`，然后运行：
+
+```powershell
+npm run build:exe
+npm run smoke:real -- -StartProxy
+```
+
+`smoke:real` 默认会跑三个探针：`deepseek-auto` 短请求、`reasoning.high` 路由到 Pro、以及 Responses SSE 流式请求。输出只包含状态、路由模型、响应长度和是否包含 `OK`，不会打印完整模型正文。需要排障时可以加 `-IncludeText`。
+
+也可以回放本地保存的真实 Codex `/v1/responses` 请求：
+
+```powershell
+npm run smoke:real -- -Fixture fixtures\codex-request.fixture.json -StartProxy
+```
+
+`fixtures/` 和 `*.fixture.json` 默认不进 git。真实请求样本可能包含本地路径、提示词、工具参数或其他敏感信息，提交前必须脱敏。
+
 也可以用 Codex 做一次最小探测：
 
 ```powershell

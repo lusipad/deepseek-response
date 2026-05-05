@@ -4,5 +4,7 @@ node_modules/
 dist/
 .playwright-mcp/
 .codex-request-sample.json
+fixtures/
+*.fixture.json
 *.log
 *.jsonl

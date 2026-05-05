@@ -24,6 +24,7 @@
     "start": "node src/server.js",
     "test": "node --test",
     "smoke:local": "node scripts/local-smoke.js",
+    "smoke:real": "powershell -ExecutionPolicy Bypass -File scripts/real-smoke.ps1",
     "smoke:exe": "powershell -ExecutionPolicy Bypass -File scripts/exe-smoke.ps1",
     "smoke:codex": "powershell -ExecutionPolicy Bypass -File scripts/codex-smoke.ps1",
     "mock:deepseek": "node scripts/mock-deepseek.js",
