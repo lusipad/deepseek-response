@@ -121,7 +121,7 @@ function collectModule(relativePath) {
     });
 
   transformed = transformed
-    .replace(/const isDirectRun = .*?;\n\nif \(isDirectRun\) \{\n  startStandalone\(\);\n\}\n/s, "")
+    .replace(/\/\/ <strip-from-bundle>[\s\S]*?\/\/ <\/strip-from-bundle>\n?/g, "")
     .replace(/typeof __DEEPSEEK2RESPONSE_BUNDLE__ === "undefined" && /g, "");
 
   if (exportedNames.length > 0) {

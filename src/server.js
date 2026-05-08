@@ -196,8 +196,10 @@ function isStandaloneBinaryPath(execPath) {
   return normalized.endsWith("/deepseek2response.exe") || normalized.endsWith("/deepseek2response");
 }
 
+// <strip-from-bundle>
 const isDirectRun = typeof __DEEPSEEK2RESPONSE_BUNDLE__ === "undefined" && import.meta.url === pathToFileURL(process.argv[1]).href;
 
 if (isDirectRun) {
   startStandalone();
 }
+// </strip-from-bundle>
